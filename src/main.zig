@@ -9,5 +9,9 @@ pub fn main() !void {
     };
     defer file.close();
 
+    var buffer: [1024]u8 = undefined;
+    const reader = std.fs.File.reader(file, &buffer);
+    std.debug.print("reader: {any}\n", .{reader});
+
     std.debug.print("ok\n", .{});
 }
