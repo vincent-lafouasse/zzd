@@ -9,22 +9,10 @@ fn processLine(line: []const u8) void {
 }
 
 fn readN(reader: *std.Io.Reader, n: usize) ![]const u8 {
-    if (reader.take(n)) |line| {
-        return line;
-    } else |err| {
-        _ = switch (err) {
-            error.ReadFailed => return err,
-            error.EndOfStream => {
-                const len = reader.bufferedLen();
-                if (len == 0) {
-                    return err;
-                }
-
-                const partialLine = try reader.take(reader.bufferedLen());
-                return partialLine;
-            },
-        };
-    }
+    return reader.take(n) catch |err| switch (err) {
+        error.ReadFailed => err,
+        error.EndOfStream => if (reader.bufferedLen() == 0) err else try reader.take(reader.bufferedLen()),
+    };
 }
 
 pub fn main() !void {
@@ -41,8 +29,7 @@ pub fn main() !void {
     const ioReader: *std.Io.Reader = &reader.interface;
 
     while (true) {
-        const maybeLine = readN(ioReader, line_size);
-        if (maybeLine) |line| {
+        if (readN(ioReader, line_size)) |line| {
             processLine(line);
         } else |err| {
             if (err == std.Io.Reader.Error.EndOfStream) {
