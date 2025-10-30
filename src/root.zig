@@ -1,15 +1,23 @@
 const std = @import("std");
 
+pub const Config = struct {
+    line_width: usize,
+};
+
 fn writeOffset(offset: usize, writer: *std.Io.Writer) !void {
     try writer.print("{x:08}: ", .{offset});
 }
 
-fn writeHex(line: []const u8, writer: *std.Io.Writer) !void {
+fn writeHex(line: []const u8, writer: *std.Io.Writer, line_width: usize) !void {
     const len = line.len;
     var i: @TypeOf(len) = 0;
 
-    while (i < len) : (i += 1) {
-        try writer.print("{x:02}", .{line[i]});
+    while (i < line_width) : (i += 1) {
+        if (i < len) {
+            try writer.print("{x:02}", .{line[i]});
+        } else {
+            try writer.print("  ", .{});
+        }
 
         if (i % 2 == 1) {
             try writer.print(" ", .{});
@@ -29,9 +37,9 @@ fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
     }
 }
 
-pub fn processLine(line: []const u8, offset: usize, writer: *std.Io.Writer) !void {
+pub fn processLine(line: []const u8, offset: usize, writer: *std.Io.Writer, cfg: Config) !void {
     try writeOffset(offset, writer);
-    try writeHex(line, writer);
+    try writeHex(line, writer, cfg.line_width);
     try writeAscii(line, writer);
     try writer.print("\n", .{});
     try writer.flush();

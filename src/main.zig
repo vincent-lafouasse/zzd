@@ -2,7 +2,10 @@ const std = @import("std");
 const zzd = @import("zzd");
 
 const buffer_size: usize = 1024;
-const line_size: usize = 16;
+
+const cfg = zzd.Config{
+    .line_width = 16,
+};
 
 pub fn main() !void {
     const argv = std.os.argv;
@@ -27,7 +30,7 @@ pub fn main() !void {
 
     while (true) {
         const offset = ioReader.seek;
-        const line = zzd.readN(ioReader, line_size) catch |err| switch (err) {
+        const line = zzd.readN(ioReader, cfg.line_width) catch |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
                 break;
@@ -38,7 +41,7 @@ pub fn main() !void {
             },
         };
 
-        zzd.processLine(line, offset, ioWriter) catch |err| {
+        zzd.processLine(line, offset, ioWriter, cfg) catch |err| {
             std.debug.print("Error:\n\t{any}\n", .{err});
             break;
         };
