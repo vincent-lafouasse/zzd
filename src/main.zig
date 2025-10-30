@@ -16,8 +16,8 @@ pub fn main() !void {
     var reader: std.fs.File.Reader = std.fs.File.reader(file, &buffer);
     std.debug.print("reader: {any}\n", .{reader});
 
-    const input: *std.Io.Reader = &reader.interface;
-    std.debug.print("interface: {any}\n", .{input});
+    const ioReader: *std.Io.Reader = &reader.interface;
+    std.debug.print("interface: {any}\n", .{ioReader});
 
     std.debug.print("ok\n", .{});
 }
