@@ -15,17 +15,17 @@ const AnsiColors = enum {
     const reset = "\x1b[0m";
 
     fn code(self: Self) []const u8 {
-        switch (self) {
-            Self.Black => return "\x1b[0;30m",
-            Self.Red => return "\x1b[0;31m",
-            Self.Green => return "\x1b[0;32m",
-            Self.Yellow => return "\x1b[0;33m",
-            Self.Blue => return "\x1b[0;34m",
-            Self.Purple => return "\x1b[0;35m",
-            Self.Cyan => return "\x1b[0;36m",
-            Self.White => return "\x1b[0;37m",
-            Self.None => return "",
-        }
+        return switch (self) {
+            Self.Black => "\x1b[0;30m",
+            Self.Red => "\x1b[0;31m",
+            Self.Green => "\x1b[0;32m",
+            Self.Yellow => "\x1b[0;33m",
+            Self.Blue => "\x1b[0;34m",
+            Self.Purple => "\x1b[0;35m",
+            Self.Cyan => "\x1b[0;36m",
+            Self.White => "\x1b[0;37m",
+            Self.None => "",
+        };
     }
 };
 
