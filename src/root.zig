@@ -15,16 +15,24 @@ fn writeHex(line: []const u8, writer: *std.Io.Writer) !void {
             try writer.print(" ", .{});
         }
     }
+    try writer.print(" ", .{});
+}
+
+fn isPrintable(c: u8) bool {
+    return (c >= 0x20) and (c != 0x7f);
 }
 
 fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
-    _ = line;
-    _ = writer;
+    for (line) |c| {
+        const char = if (isPrintable(c)) c else '.';
+        try writer.print("{c}", .{char});
+    }
 }
 
 pub fn processLine(line: []const u8, offset: usize, writer: *std.Io.Writer) !void {
     try writeOffset(offset, writer);
     try writeHex(line, writer);
+    try writeAscii(line, writer);
     try writer.print("\n", .{});
     try writer.flush();
 }
