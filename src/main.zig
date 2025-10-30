@@ -29,8 +29,7 @@ pub fn main() !void {
     const ioReader: *std.Io.Reader = &reader.interface;
 
     while (true) {
-        const maybeLine = readN(ioReader, line_size);
-        const line = if (maybeLine) |line| line else |err| switch (err) {
+        const line = if (readN(ioReader, line_size)) |line| line else |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
                 return;
