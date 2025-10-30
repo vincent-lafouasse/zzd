@@ -5,7 +5,10 @@ const buffer_size: usize = 1024;
 const line_size: usize = 16;
 
 pub fn main() !void {
-    const path: []const u8 = ".gitignore";
+    const argv = std.os.argv;
+
+    const path: []const u8 = if (argv.len == 1) ".gitignore" else std.mem.span(argv[1]);
+
     var file: std.fs.File = std.fs.cwd().openFile(path, .{}) catch |err| {
         std.debug.print("Failed to open file {s}:\n\t{any}\n", .{ path, err });
         return;
