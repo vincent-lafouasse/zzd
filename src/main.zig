@@ -29,15 +29,18 @@ pub fn main() !void {
     const ioReader: *std.Io.Reader = &reader.interface;
 
     while (true) {
-        if (readN(ioReader, line_size)) |line| {
-            processLine(line);
-        } else |err| {
-            if (err == std.Io.Reader.Error.EndOfStream) {
-                std.debug.print("ok\n", .{});
-            } else {
+        const maybeLine = readN(ioReader, line_size);
+        const line = if (maybeLine) |line| line else |err| switch (err) {
+            std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
-            }
-            break;
-        }
+                return;
+            },
+            std.Io.Reader.Error.EndOfStream => {
+                std.debug.print("ok\n", .{});
+                return;
+            },
+        };
+
+        processLine(line);
     }
 }
