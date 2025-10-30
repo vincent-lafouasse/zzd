@@ -1,5 +1,50 @@
 const std = @import("std");
 
+const AnsiColors = enum {
+    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Purple,
+    Cyan,
+    White,
+    None,
+
+    const Self = @This();
+    const reset = "\x1b[0m";
+
+    fn code(self: Self) []const u8 {
+        switch (self) {
+            Self.Black => return "\x1b[0;30m",
+            Self.Red => return "\x1b[0;31m",
+            Self.Green => return "\x1b[0;32m",
+            Self.Yellow => return "\x1b[0;33m",
+            Self.Blue => return "\x1b[0;34m",
+            Self.Purple => return "\x1b[0;35m",
+            Self.Cyan => return "\x1b[0;36m",
+            Self.White => return "\x1b[0;37m",
+            Self.None => return "",
+        }
+    }
+};
+
+fn byteColor(byte: u8) AnsiColors {
+    return switch (byte) {
+        0x00 => AnsiColors.None,
+        0xff => AnsiColors.Blue,
+        0x20...0xfe => AnsiColors.Green, // printable
+        0x09...0x0d => AnsiColors.Yellow, // spaces
+        else => AnsiColors.Red, // non printable
+    };
+}
+
+fn coloredPrint(writer: *std.Io.Writer, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
+    try writer.print("{s}", .{color.code()});
+    try writer.print(fmt, args);
+    try writer.print("{s}", .{AnsiColors.reset});
+}
+
 pub const Config = struct {
     line_width: usize,
 };
@@ -14,7 +59,8 @@ fn writeHex(line: []const u8, writer: *std.Io.Writer, line_width: usize) !void {
 
     while (i < line_width) : (i += 1) {
         if (i < len) {
-            try writer.print("{x:02}", .{line[i]});
+            const c = line[i];
+            try coloredPrint(writer, "{x:02}", .{c}, byteColor(c));
         } else {
             try writer.print("  ", .{});
         }
@@ -33,7 +79,7 @@ fn isPrintable(c: u8) bool {
 fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
     for (line) |c| {
         const char = if (isPrintable(c)) c else '.';
-        try writer.print("{c}", .{char});
+        try coloredPrint(writer, "{c}", .{char}, byteColor(char));
     }
 }
 
