@@ -9,7 +9,7 @@ fn writeHex(line: []const u8, writer: *std.Io.Writer) !void {
     var i: @TypeOf(len) = 0;
 
     while (i < len) : (i += 1) {
-        try writer.print("{x}", .{line[i]});
+        try writer.print("{x:02}", .{line[i]});
 
         if (i % 2 == 1) {
             try writer.print(" ", .{});
