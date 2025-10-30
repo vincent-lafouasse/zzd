@@ -1,8 +1,26 @@
 const std = @import("std");
 
+fn writeHex(line: []const u8, writer: *std.Io.Writer) !void {
+    const len = line.len;
+    var i: @TypeOf(len) = 0;
+
+    while (i < len) : (i += 1) {
+        try writer.print("{x}", .{line[i]});
+
+        if (i % 2 == 1) {
+            try writer.print(" ", .{});
+        }
+    }
+}
+
+fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
+    _ = line;
+    _ = writer;
+}
+
 pub fn processLine(line: []const u8, offset: usize, writer: *std.Io.Writer) !void {
     try writer.print("{x}:\t", .{offset});
-    try writer.print("{s}", .{line});
+    try writeHex(line, writer);
     try writer.print("\n", .{});
     try writer.flush();
 }
