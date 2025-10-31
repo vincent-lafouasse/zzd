@@ -4,7 +4,7 @@ const zzd = @import("zzd");
 const buffer_size: usize = 1024;
 
 const IoContext = struct {
-    infile: ?std.fs.File,
+    infile: ?std.fs.File, // null is stdin so no cleanup
     inputBuffer: [buffer_size]u8,
     outputBuffer: [buffer_size]u8,
     rawReader: std.fs.File.Reader,
@@ -12,6 +12,7 @@ const IoContext = struct {
 
     const Self = @This();
 
+    // expose the interface not the implementation
     fn reader(self: *Self) *std.Io.Reader {
         return &self.rawReader.interface;
     }
@@ -20,6 +21,7 @@ const IoContext = struct {
         return &self.rawWriter.interface;
     }
 
+    // only failure is openFile()
     fn open(infilePath: ?[]const u8) !Self {
         var out: Self = undefined;
 
