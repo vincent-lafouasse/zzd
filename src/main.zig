@@ -4,7 +4,7 @@ const zzd = @import("zzd");
 const buffer_size: usize = 1024;
 
 const IoContext = struct {
-    infile: ?std.fs.File, // null is stdin so no cleanup
+    infile: ?std.fs.File, // null means stdin so no cleanup
     inputBuffer: [buffer_size]u8,
     outputBuffer: [buffer_size]u8,
     rawReader: std.fs.File.Reader,
