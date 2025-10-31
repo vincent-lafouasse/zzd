@@ -31,6 +31,7 @@ const AnsiColors = enum {
     }
 };
 
+// shallow wrapper
 const ColorWriter = struct {
     writer: *std.Io.Writer,
     active: bool,
