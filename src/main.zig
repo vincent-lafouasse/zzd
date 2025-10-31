@@ -41,6 +41,7 @@ const IoContext = struct {
 };
 
 pub fn main() !void {
+    // yes std.os.argv is not portable, no i do not care
     const cfg = zzd.Config.parse(std.os.argv[1..]);
 
     var io = try IoContext.open(cfg.infilePath);
