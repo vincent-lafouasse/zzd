@@ -23,16 +23,21 @@ const IoContext = struct {
 
     // only failure path is openFile()
     fn open(infilePath: ?[]const u8) !Self {
-        var out: Self = undefined;
-
         const infile = if (infilePath) |path| try std.fs.cwd().openFile(path, .{}) else std.fs.File.stdin();
         const outfile = std.fs.File.stdout();
 
-        out.rawReader = infile.reader(&out.inputBuffer);
-        out.rawWriter = outfile.writer(&out.outputBuffer);
-        out.infile = if (infilePath) |_| infile else null;
+        var inputBuffer: [buffer_size]u8 = undefined;
+        var outputBuffer: [buffer_size]u8 = undefined;
+        const rawReader = infile.reader(&inputBuffer);
+        const rawWriter = outfile.writer(&outputBuffer);
 
-        return out;
+        return Self{
+            .infile = if (infilePath) |_| infile else null,
+            .inputBuffer = inputBuffer,
+            .outputBuffer = outputBuffer,
+            .rawReader = rawReader,
+            .rawWriter = rawWriter,
+        };
     }
 
     fn close(self: Self) void {
