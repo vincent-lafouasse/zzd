@@ -80,6 +80,7 @@ fn writeOffset(offset: usize, writer: ColorWriter) !void {
 fn writeHex(line: []const u8, writer: ColorWriter, line_width: usize) !void {
     const len = line.len;
     var i: @TypeOf(len) = 0;
+    const bytesPerBlock: usize = 2;
 
     while (i < line_width) : (i += 1) {
         if (i < len) {
@@ -89,7 +90,7 @@ fn writeHex(line: []const u8, writer: ColorWriter, line_width: usize) !void {
             try writer.print("  ", .{});
         }
 
-        if (i % 2 == 1) {
+        if ((i + 1) % bytesPerBlock == 0) {
             try writer.print(" ", .{});
         }
     }
