@@ -3,8 +3,6 @@ const zzd = @import("zzd");
 
 const buffer_size: usize = 1024;
 
-const cfg = zzd.Config.default();
-
 const IoContext = struct {
     infile: ?std.fs.File,
     inputBuffer: [buffer_size]u8,
@@ -43,10 +41,9 @@ const IoContext = struct {
 };
 
 pub fn main() !void {
-    const argv = std.os.argv;
+    const cfg = zzd.Config.parse(std.os.argv[1..]);
 
-    const infilePath: []const u8 = if (argv.len == 1) ".gitignore" else std.mem.span(argv[1]);
-    var io = try IoContext.open(infilePath);
+    var io = try IoContext.open(cfg.infilePath);
     defer io.close();
 
     var offset: usize = 0;
