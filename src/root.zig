@@ -73,7 +73,7 @@ fn writeHex(line: []const u8, writer: *std.Io.Writer, line_width: usize) !void {
 }
 
 fn isPrintable(c: u8) bool {
-    return (c >= 0x20) and (c != 0x7f);
+    return (c >= 0x20) and (c < 0x7f);
 }
 
 fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
