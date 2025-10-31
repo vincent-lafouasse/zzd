@@ -40,29 +40,27 @@ const IoContext = struct {
     }
 };
 
+fn die(status: u8, comptime fmt: []const u8, args: anytype) noreturn {
+    std.debug.print(fmt, args);
+    std.process.exit(status);
+}
+
 pub fn main() !void {
     // yes std.os.argv is not portable, no i do not care
     const cfg = zzd.Config.parse(std.os.argv[1..]);
 
-    var io = try IoContext.open(cfg.infilePath);
+    var io = IoContext.open(cfg.infilePath) catch |err| die(1, "Failed to open file {s}\n\t{any}\n", .{ cfg.infilePath.?, err });
     defer io.close();
 
     var offset: usize = 0;
     while (true) {
         const line = zzd.readN(io.reader(), cfg.line_width) catch |err| switch (err) {
-            std.Io.Reader.Error.ReadFailed => {
-                std.debug.print("Read failed\n\t{any}", .{err});
-                std.process.exit(1);
-            },
-            std.Io.Reader.Error.EndOfStream => {
-                break;
-            },
+            std.Io.Reader.Error.ReadFailed => die(1, "Read failed\n\t{any}", .{err}),
+            std.Io.Reader.Error.EndOfStream => break,
         };
 
-        zzd.processLine(line, offset, io.writer(), cfg) catch |err| {
-            std.debug.print("Error:\n\t{any}\n", .{err});
-            std.process.exit(1);
-        };
+        zzd.processLine(line, offset, io.writer(), cfg) catch |err|
+            die(1, "Error:\n\t{any}\n", .{err});
         offset += line.len;
     }
 }
