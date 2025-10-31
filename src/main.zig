@@ -3,9 +3,7 @@ const zzd = @import("zzd");
 
 const buffer_size: usize = 1024;
 
-const cfg = zzd.Config{
-    .line_width = 16,
-};
+const cfg = zzd.Config.default();
 
 pub fn main() !void {
     const argv = std.os.argv;

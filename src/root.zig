@@ -1,5 +1,7 @@
 const std = @import("std");
 
+pub const Config = @import("config.zig").Config;
+
 const AnsiColors = enum {
     Black,
     Red,
@@ -48,10 +50,6 @@ fn coloredPrint(writer: *std.Io.Writer, comptime fmt: []const u8, args: anytype,
         try writer.print("{s}", .{AnsiColors.reset});
     }
 }
-
-pub const Config = struct {
-    line_width: usize,
-};
 
 fn writeOffset(offset: usize, writer: *std.Io.Writer) !void {
     try writer.print("{x:08}: ", .{offset});
