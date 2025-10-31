@@ -30,7 +30,13 @@ const AnsiColors = enum {
 };
 
 fn byteColor(byte: u8) AnsiColors {
-    return if (byte == 0x00) AnsiColors.None else if (byte == 0xff) AnsiColors.Blue else if (byte == 0x09 or byte == 0x0a or byte == 0x0d) AnsiColors.Yellow else if (isPrintable(byte)) AnsiColors.Green else AnsiColors.Red;
+    return switch (byte) {
+        0x00 => AnsiColors.None,
+        0xff => AnsiColors.Blue,
+        0x09, 0x0a, 0x0d => AnsiColors.Yellow,
+        0x20...0x7e => AnsiColors.Green,
+        else => AnsiColors.Red,
+    };
 }
 
 fn coloredPrint(writer: *std.Io.Writer, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
