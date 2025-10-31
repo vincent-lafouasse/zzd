@@ -14,7 +14,7 @@ pub fn main() !void {
 
     var file: std.fs.File = std.fs.cwd().openFile(path, .{}) catch |err| {
         std.debug.print("Failed to open file {s}:\n\t{any}\n", .{ path, err });
-        return;
+        std.process.exit(1);
     };
     defer file.close();
 
@@ -33,17 +33,16 @@ pub fn main() !void {
         const line = zzd.readN(ioReader, cfg.line_width) catch |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
-                break;
+                std.process.exit(1);
             },
             std.Io.Reader.Error.EndOfStream => {
-                std.debug.print("ok\n", .{});
                 break;
             },
         };
 
         zzd.processLine(line, offset, ioWriter, cfg) catch |err| {
             std.debug.print("Error:\n\t{any}\n", .{err});
-            break;
+            std.process.exit(1);
         };
     }
 }
