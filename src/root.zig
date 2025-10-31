@@ -31,6 +31,37 @@ const AnsiColors = enum {
     }
 };
 
+const ColorWriter = struct {
+    writer: *std.Io.Writer,
+    active: bool,
+
+    fn new(writer: *std.Io.Writer) ColorWriter {
+        return .{ .writer = writer, .active = true };
+    }
+
+    fn printColor(self: ColorWriter, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
+        if (self.active and color != AnsiColors.None) {
+            try self.print("{s}", .{color.code()});
+        }
+        try self.print(fmt, args);
+        if (self.active and color != AnsiColors.None) {
+            try self.print("{s}", .{AnsiColors.reset});
+        }
+    }
+
+    fn print(self: ColorWriter, comptime fmt: []const u8, args: anytype) !void {
+        try self.writer.print(fmt, args);
+    }
+
+    fn activate(self: *ColorWriter) void {
+        self.active = true;
+    }
+
+    fn deactivate(self: *ColorWriter) void {
+        self.active = false;
+    }
+};
+
 fn byteColor(byte: u8) AnsiColors {
     return switch (byte) {
         0x00 => AnsiColors.None,
@@ -41,28 +72,18 @@ fn byteColor(byte: u8) AnsiColors {
     };
 }
 
-fn coloredPrint(writer: *std.Io.Writer, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
-    if (color != AnsiColors.None) {
-        try writer.print("{s}", .{color.code()});
-    }
-    try writer.print(fmt, args);
-    if (color != AnsiColors.None) {
-        try writer.print("{s}", .{AnsiColors.reset});
-    }
-}
-
-fn writeOffset(offset: usize, writer: *std.Io.Writer) !void {
+fn writeOffset(offset: usize, writer: ColorWriter) !void {
     try writer.print("{x:08}: ", .{offset});
 }
 
-fn writeHex(line: []const u8, writer: *std.Io.Writer, line_width: usize) !void {
+fn writeHex(line: []const u8, writer: ColorWriter, line_width: usize) !void {
     const len = line.len;
     var i: @TypeOf(len) = 0;
 
     while (i < line_width) : (i += 1) {
         if (i < len) {
             const c = line[i];
-            try coloredPrint(writer, "{x:02}", .{c}, byteColor(c));
+            try writer.printColor("{x:02}", .{c}, byteColor(c));
         } else {
             try writer.print("  ", .{});
         }
@@ -78,17 +99,18 @@ fn isPrintable(c: u8) bool {
     return (c >= 0x20) and (c < 0x7f);
 }
 
-fn writeAscii(line: []const u8, writer: *std.Io.Writer) !void {
+fn writeAscii(line: []const u8, writer: ColorWriter) !void {
     for (line) |c| {
         const char = if (isPrintable(c)) c else '.';
-        try coloredPrint(writer, "{c}", .{char}, byteColor(c));
+        try writer.printColor("{c}", .{char}, byteColor(c));
     }
 }
 
 pub fn processLine(line: []const u8, offset: usize, writer: *std.Io.Writer, cfg: Config) !void {
-    try writeOffset(offset, writer);
-    try writeHex(line, writer, cfg.line_width);
-    try writeAscii(line, writer);
+    const colorWriter = ColorWriter.new(writer);
+    try writeOffset(offset, colorWriter);
+    try writeHex(line, colorWriter, cfg.line_width);
+    try writeAscii(line, colorWriter);
     try writer.print("\n", .{});
     try writer.flush();
 }
