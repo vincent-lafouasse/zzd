@@ -40,9 +40,13 @@ fn byteColor(byte: u8) AnsiColors {
 }
 
 fn coloredPrint(writer: *std.Io.Writer, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
-    try writer.print("{s}", .{color.code()});
+    if (color != AnsiColors.None) {
+        try writer.print("{s}", .{color.code()});
+    }
     try writer.print(fmt, args);
-    try writer.print("{s}", .{AnsiColors.reset});
+    if (color != AnsiColors.None) {
+        try writer.print("{s}", .{AnsiColors.reset});
+    }
 }
 
 pub const Config = struct {
