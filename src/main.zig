@@ -44,8 +44,8 @@ pub fn main() !void {
     const reader: *std.Io.Reader = &ioCtx.rawReader.interface;
     const writer: *std.Io.Writer = &ioCtx.rawWriter.interface;
 
+    var offset: usize = 0;
     while (true) {
-        const offset = reader.seek;
         const line = zzd.readN(reader, cfg.line_width) catch |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
@@ -60,5 +60,6 @@ pub fn main() !void {
             std.debug.print("Error:\n\t{any}\n", .{err});
             std.process.exit(1);
         };
+        offset += line.len;
     }
 }
