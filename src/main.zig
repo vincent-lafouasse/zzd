@@ -14,6 +14,14 @@ const IoContext = struct {
 
     const Self = @This();
 
+    fn reader(self: *Self) *std.Io.Reader {
+        return &self.rawReader.interface;
+    }
+
+    fn writer(self: *Self) *std.Io.Writer {
+        return &self.rawWriter.interface;
+    }
+
     fn open(infilePath: ?[]const u8) !Self {
         var out: Self = undefined;
 
@@ -38,15 +46,12 @@ pub fn main() !void {
     const argv = std.os.argv;
 
     const infilePath: []const u8 = if (argv.len == 1) ".gitignore" else std.mem.span(argv[1]);
-    var ioCtx = try IoContext.open(infilePath);
-    defer ioCtx.close();
-
-    const reader: *std.Io.Reader = &ioCtx.rawReader.interface;
-    const writer: *std.Io.Writer = &ioCtx.rawWriter.interface;
+    var io = try IoContext.open(infilePath);
+    defer io.close();
 
     var offset: usize = 0;
     while (true) {
-        const line = zzd.readN(reader, cfg.line_width) catch |err| switch (err) {
+        const line = zzd.readN(io.reader(), cfg.line_width) catch |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
                 std.process.exit(1);
@@ -56,7 +61,7 @@ pub fn main() !void {
             },
         };
 
-        zzd.processLine(line, offset, writer, cfg) catch |err| {
+        zzd.processLine(line, offset, io.writer(), cfg) catch |err| {
             std.debug.print("Error:\n\t{any}\n", .{err});
             std.process.exit(1);
         };
