@@ -41,12 +41,12 @@ pub fn main() !void {
     var ioCtx = try IoContext.open(infilePath);
     defer ioCtx.close();
 
-    const ioReader: *std.Io.Reader = &ioCtx.rawReader.interface;
-    const ioWriter: *std.Io.Writer = &ioCtx.rawWriter.interface;
+    const reader: *std.Io.Reader = &ioCtx.rawReader.interface;
+    const writer: *std.Io.Writer = &ioCtx.rawWriter.interface;
 
     while (true) {
-        const offset = ioReader.seek;
-        const line = zzd.readN(ioReader, cfg.line_width) catch |err| switch (err) {
+        const offset = reader.seek;
+        const line = zzd.readN(reader, cfg.line_width) catch |err| switch (err) {
             std.Io.Reader.Error.ReadFailed => {
                 std.debug.print("Read failed\n\t{any}", .{err});
                 std.process.exit(1);
@@ -56,7 +56,7 @@ pub fn main() !void {
             },
         };
 
-        zzd.processLine(line, offset, ioWriter, cfg) catch |err| {
+        zzd.processLine(line, offset, writer, cfg) catch |err| {
             std.debug.print("Error:\n\t{any}\n", .{err});
             std.process.exit(1);
         };
