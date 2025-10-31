@@ -26,6 +26,8 @@ const IoContext = struct {
         const infile = if (infilePath) |path| try std.fs.cwd().openFile(path, .{}) else std.fs.File.stdin();
         const outfile = std.fs.File.stdout();
 
+        // infile.reader() and outfile.writer() don't need the buffers to be
+        // cleared and take full control of the buffers
         var inputBuffer: [buffer_size]u8 = undefined;
         var outputBuffer: [buffer_size]u8 = undefined;
         const rawReader = infile.reader(&inputBuffer);
