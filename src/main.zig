@@ -21,7 +21,7 @@ const IoContext = struct {
         return &self.rawWriter.interface;
     }
 
-    // only failure is openFile()
+    // only failure path is openFile()
     fn open(infilePath: ?[]const u8) !Self {
         var out: Self = undefined;
 
