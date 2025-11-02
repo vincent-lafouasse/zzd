@@ -41,13 +41,9 @@ const ColorWriter = struct {
     }
 
     fn printColor(self: ColorWriter, comptime fmt: []const u8, args: anytype, color: AnsiColors) !void {
-        if (self.active and color != AnsiColors.None) {
-            try self.print("{s}", .{color.code()});
-        }
+        if (self.active) try self.print("{s}", .{color.code()});
         try self.print(fmt, args);
-        if (self.active and color != AnsiColors.None) {
-            try self.print("{s}", .{AnsiColors.reset});
-        }
+        if (self.active) try self.print("{s}", .{AnsiColors.reset});
     }
 
     fn print(self: ColorWriter, comptime fmt: []const u8, args: anytype) !void {
